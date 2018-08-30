@@ -1,5 +1,26 @@
 <?php
-// put your code here
+/*
+ * Page de connection
+ * Théo Hurlimann
+ * 30.08.2018
+ * Page permettant de se connecter à l'aide d'un identifiant et un mot de passe.
+ */
+
+
+$erreur = "";
+if (filter_has_var(INPUT_POST, 'btnLogin')) {
+    $identifiant = filter_input(INPUT_POST, 'tbxIdentifiant');
+    $mdp = filter_input(INPUT_POST, 'tbxMdp');
+    if ($identifiant == "") {
+        $erreur = "Veuillez renseigner votre Identifiant";
+    }
+    else{
+        $result = authenticate($identifiant, $mdp);
+        if ($result) {
+            header("Location: confirmation.php");
+        }
+    }
+}
 ?>
 <!DOCTYPE html>
 <!--
@@ -10,21 +31,24 @@ and open the template in the editor.
 <html>
     <head>
         <meta charset="UTF-8">
-        <title></title>
+        <title> Connection</title>
         <link href="style/style.css" rel="stylesheet" type="text/css"/>
     </head>
     <body>
+        
         <fieldset>
             <legend>Connection</legend>
-            <form action="#" method="POST" >
+            <h2><?php echo $erreur ?></h2>
+            <form action="connection.php" method="POST" >
                 <label>Identifiant:</label>
-                <input type="text" name="tbxIdentifiant">
+                <input type="text" name="tbxIdentifiant" value="<?php echo $identifiant ?>">
                 <label>Mot de passe:</label>
-                <input type="text" name="tbxMdp">
+                <input type="password" name="tbxMdp" >
+                <button type="submit" name="btnLogin">Valider</button>
             </form>
-            <button  name="btnLogin">Valider</button>
+            
         </fieldset>
-        
+
         <label><a href="./inscription.php" >Pas encore inscrit?</a></label>
     </body>
 </html>
