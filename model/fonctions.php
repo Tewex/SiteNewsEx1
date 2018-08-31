@@ -6,6 +6,11 @@
  * description : permet de se connecter
  * Version : 1.0
  */
+
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
+
 define('HOST', 'localhost');
 define('DBNAME', 'faurum');
 define('DBUSER', 'root'); //Utilisateur
@@ -41,8 +46,8 @@ function authenticate($identifiant, $motddepasse) {
     // Si $email existe et que le mot de passe (sha1) est le bon, retourner true
 
     $db = connectionBdd();
-    $sql = "SELECT idUser, prenom,nom, identifiant FROM users "
-            . "WHERE email = :email AND password = :password";
+    $sql = "SELECT idUser, prenom,nom, identifiant, motDePasse FROM users "
+            ." WHERE identifiant = :identifiant AND motDePasse = :motDePasse";
 
     $request = $db->prepare($sql);
     if ($request->execute(array(
@@ -60,4 +65,39 @@ function authenticate($identifiant, $motddepasse) {
     }
 
    
+}
+
+function addUser($prenom, $nom, $identifiant, $mdp) {
+    $db = connectionBdd();
+    $sql = "INSERT INTO users(prenom,nom,identifiant,motDePasse) " .
+            " VALUES (:prenom, :nom, :identifiant, :motDePasse)";
+    $request = $db->prepare($sql);
+    if ($request->execute(array(
+                'prenom' => $prenom,
+                'nom' => $nom,
+                'identifiant' => $identifiant,
+                'motDePasse' => sha1($mdp)))) {
+        return $db->lastInsertID();
+    } else {
+        return NULL;
+    }
+}
+
+function pseudoExists($identifiant) {
+    $db = connectionBdd();
+    $sql = "SELECT idUser FROM users "
+            . "WHERE identifiant = :identifiant";
+
+    $request = $db->prepare($sql);
+    if ($request->execute(array(
+                'identifiant' => $identifiant))) {
+        $result = $request->fetch(PDO::FETCH_ASSOC);
+        if (isset($result['idUser'])) {
+            return $result['idUser'];
+        } else {
+            return NULL;
+        }
+    } else {
+        return NULL;
+    }
 }
